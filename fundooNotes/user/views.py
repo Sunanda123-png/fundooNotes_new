@@ -1,13 +1,14 @@
 import logging
 
 from rest_framework.exceptions import ValidationError
-
 from user.serializers import UserSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import auth
 from user.task import send_mail
+from user.utils import EncodeDecodeToken
+
 logging.basicConfig(filename="views.log", filemode="w")
 
 
@@ -15,6 +16,7 @@ class UserRegistration(APIView):
     """
     class based views for User registration
     """
+
     def post(self, request):
         """
         this method is created for inserting the data
@@ -28,12 +30,16 @@ class UserRegistration(APIView):
             send_mail.delay(serializer.data["email"])
             return Response(
                 {
-                    "message": "Registered successfully",
-                    "data": serializer.data["username"]
-                },
-                status=status.HTTP_201_CREATED)
+                    'message': "Successfully Registered"
+                })
+
         except ValidationError:
             logging.error("Validation failed")
+            return Response(
+                {
+                    "message": "validation failed"
+                },
+                status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             logging.error(e)
@@ -45,6 +51,7 @@ class UserRegistration(APIView):
 
 
 class Login(APIView):
+
     def post(self, request):
         """
         This method is created for user login
@@ -56,14 +63,16 @@ class Login(APIView):
             password = request.data.get("password")
             user = auth.authenticate(username=username, password=password)
             if user is not None:
+                payload={}
+                encoded_token = EncodeDecodeToken.encode_token(user.pk)
                 return Response(
                     {
-                        "message": "login successfully"
-                    },
-                    status=status.HTTP_200_OK)
+                        "message": "logged in successfully",
+                        "data": {"token": encoded_token}
+                    }, status=status.HTTP_202_ACCEPTED)
             return Response(
                 {
-                    "message": "login failed"
+                    "message": "login failed No user"
                 },
                 status=status.HTTP_404_NOT_FOUND)
         except ValidationError:

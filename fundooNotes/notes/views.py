@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from notes.models import Note
 from notes.serializers import NotesSerializer
-from notes.utility import Cache
+from notes.utility import verify_token
 
 
 logging.basicConfig(filename="views.log", filemode="w")
@@ -15,7 +15,7 @@ class Notes(APIView):
     """
     class based views for crud operation
     """
-
+    @verify_token
     def post(self, request):
         """
         this method is created for inserting the data
@@ -26,7 +26,7 @@ class Notes(APIView):
             serializer = NotesSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            Cache().add_note_to_cache(request.data.get("user_id"),serializer.data)
+            # Cache().add_note_to_cache(request.data.get("user_id"),serializer.data)
             return Response(
                 {
                     "message": "Data store successfully",
@@ -48,6 +48,7 @@ class Notes(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @verify_token
     def get(self, request):
         """
         this method is created for retrieve data
@@ -55,9 +56,9 @@ class Notes(APIView):
         :return: Response
         """
         try:
-            note = Note.objects.filter(user_id=request.GET.get("user_id"))
+            note = Note.objects.filter(user_id=request.data.get("user_id"))
             serializer = NotesSerializer(note, many=True)
-            Cache().get_note_from_cache(user_id=request.GET.get("user_id"))
+            # Cache().get_note_from_cache(user_id=request.GET.get("user_id"))
             return Response(
                 {
                     "message": "Here your Note",
@@ -73,6 +74,7 @@ class Notes(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @verify_token
     def put(self, request):
         """
         this method is created for update the data
@@ -80,11 +82,11 @@ class Notes(APIView):
         :return: Response
         """
         try:
-            note = Note.objects.get(pk=request.data["id"])
+            note = Note.objects.get(id=request.data["id"])
             serializer = NotesSerializer(note, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            Cache().add_note_to_cache(request.data.get("user_id"), serializer.data)
+            # Cache().add_note_to_cache(request.data.get("user_id"), serializer.data)
             return Response(
                 {
                     "message": "Data updated successfully",
@@ -100,6 +102,7 @@ class Notes(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logging.error(e)
+            print(e)
             return Response(
                 {
                     "message": "no such note found",
@@ -107,6 +110,7 @@ class Notes(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+    @verify_token
     def delete(self, request):
         """
         this method is created for delete the note
@@ -116,7 +120,7 @@ class Notes(APIView):
         try:
             note = Note.objects.get(pk=request.data["id"])
             note.delete()
-            Cache().delete_note_to_cache(request.data.get("user_id"),request.data.get("id"))
+            # Cache().delete_note_to_cache(request.data.get("user_id"),request.data.get("id"))
             return Response(
                 {
                     "message": "Data deleted"
