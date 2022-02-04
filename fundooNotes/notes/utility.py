@@ -1,7 +1,9 @@
 import json
 import logging
-
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import QueryDict
+from rest_framework.response import Response
+from user.utils import EncodeDecodeToken
 
 from .redis import RedisCode
 
@@ -71,3 +73,20 @@ class Cache:
                 return
         else:
             raise ObjectDoesNotExist
+
+
+def verify_token(function):
+    def wrapper(self, request):
+        if 'HTTP_AUTHORIZATION' not in request.META:
+            resp = Response({'message': 'Token not provided in the header'})
+            resp.status_code = 400
+            logging.info('Token not provided in the header')
+            return resp
+        token = request.META['HTTP_AUTHORIZATION']
+        user_id = EncodeDecodeToken.decode_token(token)
+        if isinstance(request.data, QueryDict):
+            request.data._mutable = True
+        request.data.update({'user_id': user_id["user_id"]})
+        return function(self, request)
+
+    return wrapper
