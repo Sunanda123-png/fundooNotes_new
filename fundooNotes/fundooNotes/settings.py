@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'notes',
     'django_celery_results',
     'corsheaders',
-    # 'rest_framework_simplejwt',
+    'drf_yasg',
 ]
 AUTH_USER_MODEL = "user.User"
 
@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'user.middleware.CountRequestsMiddleware',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 ROOT_URLCONF = 'fundooNotes.urls'
@@ -77,19 +78,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'fundooNotes.wsgi.application'
 
+#token setting
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-#     'ROTATE_REFRESH_TOKENS': True,
-#     'ALGORITHM': 'HS256',
-#     'SIGNING_KEY': SECRET_KEY,
-#     'VERIFYING_KEY': None,
-# }
+
+#swagger settings
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        "Auth Token eg [Bearer (JWT)]":{
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
 
 
 # Database

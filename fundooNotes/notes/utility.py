@@ -9,6 +9,9 @@ from .redis import RedisCode
 
 
 class Cache:
+    """
+    this class is created for caching which user try to access frequently
+    """
 
     def add_note_to_cache(self, user_id, note):
         """
@@ -76,6 +79,9 @@ class Cache:
 
 
 def verify_token(function):
+    """
+    this function is created for verifying user
+    """
     def wrapper(self, request):
         if 'HTTP_AUTHORIZATION' not in request.META:
             resp = Response({'message': 'Token not provided in the header'})
