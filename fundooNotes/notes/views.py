@@ -1,4 +1,7 @@
 import logging
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
@@ -15,6 +18,17 @@ class Notes(APIView):
     """
     class based views for crud operation
     """
+
+    @swagger_auto_schema(
+        operation_summary="Add notes",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'title': openapi.Schema(type=openapi.TYPE_STRING, description="title"),
+                'description': openapi.Schema(type=openapi.TYPE_STRING, description="description"),
+            }
+        ),
+        )
     @verify_token
     def post(self, request):
         """
@@ -48,6 +62,9 @@ class Notes(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        operation_summary="fetch notes",
+    )
     @verify_token
     def get(self, request):
         """
@@ -74,6 +91,17 @@ class Notes(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(
+        operation_summary="update notes",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'title': openapi.Schema(type=openapi.TYPE_STRING, description="title"),
+                'description': openapi.Schema(type=openapi.TYPE_STRING, description="description"),
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="note id"),
+            }
+        ),
+    )
     @verify_token
     def put(self, request):
         """
@@ -110,6 +138,15 @@ class Notes(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+    @swagger_auto_schema(
+        operation_summary="Delete notes",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': openapi.Schema(type=openapi.TYPE_INTEGER, description="note id"),
+            }
+        ),
+    )
     @verify_token
     def delete(self, request):
         """

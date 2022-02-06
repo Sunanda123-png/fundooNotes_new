@@ -1,5 +1,7 @@
 import logging
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import ValidationError
 from user.serializers import UserSerializer
 from rest_framework.views import APIView
@@ -11,12 +13,28 @@ from user.utils import EncodeDecodeToken
 
 logging.basicConfig(filename="views.log", filemode="w")
 
+header = openapi.Parameter('token',in_=openapi.IN_HEADER,type=openapi.TYPE_STRING)
+
 
 class UserRegistration(APIView):
     """
     class based views for User registration
     """
 
+    @swagger_auto_schema(
+        operation_summary="register user",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='password'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='email'),
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='first name'),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='last name'),
+                "age": openapi.Schema(type=openapi.TYPE_STRING, description='age'),
+                "is_verified": openapi.Schema(type=openapi.TYPE_STRING, description='is_verified')
+            }
+        ))
     def post(self, request):
         """
         this method is created for inserting the data
@@ -51,7 +69,19 @@ class UserRegistration(APIView):
 
 
 class Login(APIView):
+    """
+    This class is created for login api
+    """
 
+    @swagger_auto_schema(
+        operation_summary="login user",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'username': openapi.Schema(type=openapi.TYPE_STRING, description='username'),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, description='password'),
+            }
+        ))
     def post(self, request):
         """
         This method is created for user login
@@ -63,7 +93,6 @@ class Login(APIView):
             password = request.data.get("password")
             user = auth.authenticate(username=username, password=password)
             if user is not None:
-                payload={}
                 encoded_token = EncodeDecodeToken.encode_token(user.pk)
                 return Response(
                     {
