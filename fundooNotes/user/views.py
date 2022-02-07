@@ -1,8 +1,12 @@
 import logging
 
+from django.db import connection
+from django.shortcuts import render
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import ValidationError
+
+from user.models import User
 from user.serializers import UserSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -106,3 +110,10 @@ class Login(APIView):
                 status=status.HTTP_404_NOT_FOUND)
         except ValidationError:
             logging.error("Authentication failed")
+
+
+def profile(request):
+    cursor = connection.cursor()
+    User.objects.all()
+    post =cursor.execute("SELECT * from user_user WHERE user_id_id = 2 ")
+    return render(request, 'personal.html', {'data': post})

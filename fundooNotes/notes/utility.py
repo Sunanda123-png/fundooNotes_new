@@ -57,6 +57,7 @@ class Cache:
             if updatednote.get(id) == note.get(id):
                 note.update(updatednote)
                 return
+
         else:
             raise ObjectDoesNotExist
 
